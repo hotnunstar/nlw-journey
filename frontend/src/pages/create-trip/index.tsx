@@ -12,7 +12,7 @@ export function CreateTripPage() {
   const [isGuestsInputOpen, setIsGuestsInputOpen] = useState(false)
   const [isGuestsModalOpen, setIsGuestsModalOpen] = useState(false)
   const [isConfirmTripModalOpen, setIsConfirmTripModalOpen] = useState(false)
-  const [emailsToInvite, setEmailsToInvite] = useState(['diego@rocketseat.com.br', 'john@acme.com'])
+  const [emailsToInvite, setEmailsToInvite] = useState<string[]>([])
 
   const [destination, setDestination] = useState('')
   const [ownerName, setOwnerName] = useState('')
@@ -20,7 +20,9 @@ export function CreateTripPage() {
   const [eventStartAndEndDates, setEventStartAndEndDates] = useState<DateRange | undefined>()
 
   function openGuestsInput() {
-    setIsGuestsInputOpen(true)
+    !destination || eventStartAndEndDates?.from == undefined || eventStartAndEndDates?.to == undefined
+      ? alert('Please, tell us your trip destination and dates to continue.')
+      : setIsGuestsInputOpen(true)
   }
 
   function closeGuestsInput() {
@@ -36,7 +38,7 @@ export function CreateTripPage() {
   }
 
   function openConfirmTripModal() {
-    setIsConfirmTripModalOpen(true)
+    emailsToInvite.length === 0 ? alert("Please, insert your guests' emails to continue.") : setIsConfirmTripModalOpen(true)
   }
 
   function closeConfirmTripModal() {
@@ -49,13 +51,8 @@ export function CreateTripPage() {
     const data = new FormData(event.currentTarget)
     const email = data.get('email')?.toString()
 
-    if (!email) {
-      return
-    }
-
-    if (emailsToInvite.includes(email)) {
-      return
-    }
+    if (!email) return
+    if (emailsToInvite.includes(email)) return
 
     setEmailsToInvite([...emailsToInvite, email])
 
@@ -70,16 +67,11 @@ export function CreateTripPage() {
 
   async function createTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    console.log(destination)
-    console.log(eventStartAndEndDates)
-    console.log(emailsToInvite)
-    console.log(ownerName)
-    console.log(ownerEmail)
 
-    if(!destination) return
-    if(!eventStartAndEndDates?.from || !eventStartAndEndDates?.to) return
-    if(emailsToInvite.length === 0) return
-    if(!ownerName || !ownerEmail) return
+    if (!ownerName || !ownerEmail) {
+      alert('Please, tell us your name and email to continue.')
+      return
+    }
 
     const response = await api.post('/trips', {
       destination: destination,
@@ -100,7 +92,7 @@ export function CreateTripPage() {
       <div className='max-w-3xl w-full px-6 text-center space-y-10'>
         <div className='flex flex-col items-center gap-3'>
           <img src='/logo.svg' alt='plann.er' />
-          <p className='text-zinc-300 text-lg'>Convide seus amigos e planeje sua próxima viagem!</p>
+          <p className='text-zinc-300 text-lg'>Invite your friends and plan your next trip!</p>
         </div>
 
         <div className='space-y-4'>
@@ -119,16 +111,8 @@ export function CreateTripPage() {
         </div>
 
         <p className='text-sm text-zinc-500'>
-          Ao planejar sua viagem pela plann.er você automaticamente concorda <br />
-          com nossos{' '}
-          <a className='text-zinc-300 underline' href='#'>
-            termos de uso
-          </a>{' '}
-          e{' '}
-          <a className='text-zinc-300 underline' href='#'>
-            políticas de privacidade
-          </a>
-          .
+          By planning your trip through plann.er you automatically <br /> agree to our <span className='text-zinc-300 underline'>terms of use</span>{' '}
+          and <span className='text-zinc-300 underline'>privacy policies</span>.
         </p>
       </div>
 
@@ -143,6 +127,8 @@ export function CreateTripPage() {
 
       {isConfirmTripModalOpen && (
         <ConfirmTripModal
+          destination={destination}
+          eventStartAndEndDates={eventStartAndEndDates}
           closeConfirmTripModal={closeConfirmTripModal}
           createTrip={createTrip}
           setOwnerName={setOwnerName}

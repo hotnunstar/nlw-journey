@@ -14,7 +14,14 @@ interface DestinationAndDateStepProps {
   setEventStartAndEndDates: (dates: DateRange | undefined) => void
 }
 
-export function DestinationAndDateStep({ closeGuestsInput, isGuestsInputOpen, openGuestsInput, setDestination, setEventStartAndEndDates, eventStartAndEndDates }: DestinationAndDateStepProps) {
+export function DestinationAndDateStep({
+  closeGuestsInput,
+  isGuestsInputOpen,
+  openGuestsInput,
+  setDestination,
+  setEventStartAndEndDates,
+  eventStartAndEndDates,
+}: DestinationAndDateStepProps) {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
 
   function openDatePicker() {
@@ -27,7 +34,7 @@ export function DestinationAndDateStep({ closeGuestsInput, isGuestsInputOpen, op
 
   const displayedDate =
     eventStartAndEndDates && eventStartAndEndDates.from && eventStartAndEndDates.to
-      ? format(eventStartAndEndDates.from, "d ' de ' LLL").concat(' até ').concat(format(eventStartAndEndDates.to, "d ' de ' LLL"))
+      ? format(eventStartAndEndDates.from, 'LLL d').concat(' - ').concat(format(eventStartAndEndDates.to, 'LLL d'))
       : null
 
   return (
@@ -37,15 +44,15 @@ export function DestinationAndDateStep({ closeGuestsInput, isGuestsInputOpen, op
         <input
           disabled={isGuestsInputOpen}
           type='text'
-          placeholder='Para onde você vai?'
+          placeholder='Where are you going?'
           className='bg-transparent text-lg placeholder-zinc-400 outline-none flex-1'
-          onChange={event => setDestination(event.target.value)}
+          onChange={(event) => setDestination(event.target.value)}
         />
       </div>
 
       <button onClick={openDatePicker} disabled={isGuestsInputOpen} className='flex items-center gap-2 text-left'>
         <Calendar className='size-5 text-zinc-400' />
-        <span className='text-lg text-zinc-400 flex-1'>{displayedDate || 'Quando?'}</span>
+        <span className='text-lg text-zinc-400 flex-1'>{displayedDate || 'When?'}</span>
       </button>
 
       {isDatePickerOpen && (
@@ -53,7 +60,7 @@ export function DestinationAndDateStep({ closeGuestsInput, isGuestsInputOpen, op
           <div className='rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5'>
             <div className='space-y-2'>
               <div className='flex items-center justify-between'>
-                <h2 className='font-lg font-semibold'>Selecione a data</h2>
+                <h2 className='font-lg font-semibold'>Select the date</h2>
                 <button>
                   <X className='size-5 text-zinc-400' onClick={closeDatePicker} />
                 </button>
@@ -68,12 +75,12 @@ export function DestinationAndDateStep({ closeGuestsInput, isGuestsInputOpen, op
 
       {isGuestsInputOpen ? (
         <Button onClick={closeGuestsInput} variant='secondary'>
-          Alterar local/data
+          Change location/date
           <Settings2 className='size-5' />
         </Button>
       ) : (
         <Button onClick={openGuestsInput}>
-          Continuar
+          Continue
           <ArrowRight className='size-5' />
         </Button>
       )}
