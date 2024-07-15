@@ -3,14 +3,20 @@ import { Button } from '../../components/button'
 import { FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { api } from '../../lib/axios'
+import { Trip } from './index'
 
 interface CreateActivityModalProps {
   closeCreateActivityModal: () => void
+  trip: Trip | undefined
 }
 
-export function CreateActivityModal({ closeCreateActivityModal }: CreateActivityModalProps) {
+export function CreateActivityModal({ closeCreateActivityModal, trip }: CreateActivityModalProps) {
   const { tripId } = useParams()
-  
+  const minDateUTC = trip?.starts_at ? new Date(trip?.starts_at) : new Date()
+  const minDate = new Date(minDateUTC.getTime() - minDateUTC.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+  const maxDateUTC = trip?.ends_at ? new Date(trip?.ends_at) : new Date()
+  const maxDate = new Date(maxDateUTC.getTime() - maxDateUTC.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+
   async function createActivity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -20,13 +26,13 @@ export function CreateActivityModal({ closeCreateActivityModal }: CreateActivity
 
     await api.post(`/trips/${tripId}/activities`, {
       title,
-      occurs_at
+      occurs_at,
     })
 
     closeCreateActivityModal()
     window.location.reload()
   }
-  
+
   return (
     <div className='fixed inset-0 bg-black/60 flex items-center justify-center'>
       <div className='w-[640px] rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5'>
@@ -52,6 +58,8 @@ export function CreateActivityModal({ closeCreateActivityModal }: CreateActivity
             <input
               type='datetime-local'
               name='occurs_at'
+              min={minDate}
+              max={maxDate}
               placeholder='Date and time of activity'
               className='bg-transparent text-lg placeholder-zinc-400 outline-none flex-1'
             />
