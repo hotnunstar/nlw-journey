@@ -8,6 +8,7 @@ import { DestinationAndDateHeader } from './destination-and-date-header'
 import { CreateLinkModal } from './create-link-modal'
 import { api } from '../../lib/axios'
 import { useParams } from 'react-router-dom'
+import { InviteGuestsModal } from './invite-guests-modal'
 
 export interface Trip {
   id: string
@@ -17,14 +18,27 @@ export interface Trip {
   is_confirmed: boolean
 }
 
+export interface Participant {
+  id: string
+  name: string | null
+  email: string
+  is_confirmed: boolean
+}
+
 export function TripDetailsPage() {
   const { tripId } = useParams()
   const [trip, setTrip] = useState<Trip | undefined>()
+  const [participants, setParticipants] = useState<Participant[]>()
   const [isCreateActivityModalOpen, setIsCreateActivityModalOpen] = useState(false)
   const [isCreateLinkModalOpen, setIsCreateLinkModalOpen] = useState(false)
+  const [isInviteGuestsModalOpen, setIsInviteGuestsModalOpen] = useState(false)
 
   useEffect(() => {
     api.get(`/trips/${tripId}`).then((response) => setTrip(response.data.trip))
+  }, [tripId])
+
+  useEffect(() => {
+    api.get(`/trips/${tripId}/participants`).then((response) => setParticipants(response.data.participants))
   }, [tripId])
 
   function openCreateActivityModal() {
@@ -41,6 +55,15 @@ export function TripDetailsPage() {
 
   function closeCreateLinkModal() {
     setIsCreateLinkModalOpen(false)
+  }
+
+  function openInviteGuestsModal() {
+    setIsInviteGuestsModalOpen(true)
+  }
+
+  function closeInviteGuestsModal() {
+    setIsInviteGuestsModalOpen(false)
+    window.location.reload()
   }
 
   return (
@@ -69,12 +92,13 @@ export function TripDetailsPage() {
 
           <div className='w-full h-px bg-zinc-800' />
 
-          <Guests />
+          <Guests participants={participants} openInviteGuestsModal={openInviteGuestsModal} />
         </div>
       </main>
 
       {isCreateActivityModalOpen && <CreateActivityModal closeCreateActivityModal={closeCreateActivityModal} trip={trip} />}
       {isCreateLinkModalOpen && <CreateLinkModal closeCreateLinkModal={closeCreateLinkModal} />}
+      {isInviteGuestsModalOpen && (<InviteGuestsModal participants={participants} setParticipants={setParticipants} closeInviteGuestsModal={closeInviteGuestsModal} />)}
     </div>
   )
 }
